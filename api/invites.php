@@ -1,6 +1,6 @@
 <?php
-require_once '../includes/auth.php';
-require_once '../config/database.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../config/database.php';
 
 header('Content-Type: application/json');
 
@@ -27,7 +27,8 @@ switch ($method) {
         $inviteCode = bin2hex(random_bytes(16));
         $expiresAt = date('Y-m-d H:i:s', strtotime("+{$expiryHours} hours"));
         
-        $insertQuery = "INSERT INTO invites (invite_code, created_by, email, phone, role, expires_at) VALUES (:code, :created_by, :email, :phone, :role, :expires_at)";
+        $insertQuery = "INSERT INTO invites (invite_code, created_by, email, phone, role, expires_at) 
+                        VALUES (:code, :created_by, :email, :phone, :role, :expires_at)";
         $insertStmt = $db->prepare($insertQuery);
         $insertStmt->bindParam(':code', $inviteCode);
         $insertStmt->bindParam(':created_by', $_SESSION['user_id']);
@@ -37,7 +38,12 @@ switch ($method) {
         $insertStmt->bindParam(':expires_at', $expiresAt);
         
         if ($insertStmt->execute()) {
-            $inviteUrl = "http://localhost:3000/register.php?invite=" . $inviteCode;
+            // Build dynamic URL instead of hardcoding
+            $host = $_SERVER['HTTP_HOST']; // localhost, 127.0.0.1, or domain
+            $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+            $inviteUrl = $protocol . "://" . $host . "/hg_community/register.php?invite=" . $inviteCode;
+
+
             echo json_encode([
                 'success' => true, 
                 'invite_code' => $inviteCode,

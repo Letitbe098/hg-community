@@ -460,29 +460,72 @@ class CommunityApp {
             team_name: formData.get('team_name')
         };
         
+        // Validate required fields
+        if (!channelData.name || !channelData.type) {
+            this.showNotification('Channel name and type are required', 'error');
+            return;
+        }
+        
         try {
             const response = await fetch('api/channels.php', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
                 },
                 body: JSON.stringify(channelData)
             });
             
-            const data = await response.json();
+            // Check if response is ok
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('HTTP Error:', response.status, errorText);
+                throw new Error(`Server error (${response.status}): ${errorText.substring(0, 100)}`);
+            }
+            
+            const responseText = await response.text();
+            console.log('Raw response:', responseText);
+            
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('JSON Parse Error:', parseError);
+                console.error('Response text:', responseText);
+                throw new Error('Invalid server response. Check console for details.');
+            }
             
             if (data.success) {
-                alert('Channel created successfully!');
+                this.showNotification('Channel created successfully!', 'success');
                 document.getElementById('create-channel-modal').style.display = 'none';
                 form.reset();
-                this.loadChannels(); // Reload channels
+                document.getElementById('team-name-group').style.display = 'none';
+                this.loadChannels();
             } else {
-                alert('Failed to create channel: ' + data.message);
+                this.showNotification('Failed to create channel: ' + data.message, 'error');
             }
         } catch (error) {
             console.error('Error creating channel:', error);
-            alert('Error creating channel');
+            this.showNotification('Error creating channel: ' + error.message, 'error');
         }
+    }
+    
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
     }
     
     async createInvite() {

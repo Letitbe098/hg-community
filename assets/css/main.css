@@ -720,3 +720,44 @@ body {
 .channel-item:hover {
     transform: translateX(4px);
 }
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+.notification-success {
+    background: #23a559;
+    border-left: 4px solid #1a7e42;
+}
+
+.notification-error {
+    background: #ed4245;
+    border-left: 4px solid #c53030;
+}
+
+.notification-info {
+    background: #5865f2;
+    border-left: 4px solid #4752c4;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
