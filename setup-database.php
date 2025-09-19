@@ -24,6 +24,7 @@ try {
             email VARCHAR(100) UNIQUE NOT NULL,
             phone VARCHAR(15),
             password VARCHAR(255) NOT NULL,
+            bio TEXT,
             role ENUM('admin', 'moderator', 'member') DEFAULT 'member',
             status ENUM('active', 'banned', 'restricted', 'muted') DEFAULT 'active',
             avatar VARCHAR(255) DEFAULT 'default-avatar.png',

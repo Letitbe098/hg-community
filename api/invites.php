@@ -24,6 +24,24 @@ switch ($method) {
         $role = $data['role'] ?? 'member';
         $expiryHours = $data['expiry_hours'] ?? 24;
         
+        // Email is now mandatory
+        if (!$email) {
+            echo json_encode(['success' => false, 'message' => 'Email is required for invitations']);
+            exit;
+        }
+        
+        // Check if email already exists
+        $emailCheckQuery = "SELECT COUNT(*) as count FROM users WHERE email = :email";
+        $emailCheckStmt = $db->prepare($emailCheckQuery);
+        $emailCheckStmt->bindParam(':email', $email);
+        $emailCheckStmt->execute();
+        $emailResult = $emailCheckStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($emailResult['count'] > 0) {
+            echo json_encode(['success' => false, 'message' => 'A user with this email already exists']);
+            exit;
+        }
+        
         $inviteCode = bin2hex(random_bytes(16));
         $expiresAt = date('Y-m-d H:i:s', strtotime("+{$expiryHours} hours"));
         

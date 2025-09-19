@@ -245,7 +245,7 @@ class CommunityApp {
         messageEl.dataset.messageId = message.id;
         
         const timestamp = new Date(message.created_at).toLocaleString();
-        const avatarSrc = message.avatar || 'assets/images/default-avatar.png';
+        const avatarSrc = message.avatar && message.avatar !== 'default-avatar.png' ? message.avatar : 'assets/images/default-avatar.png';
         
         let fileContent = '';
         if (message.file_path) {
@@ -433,7 +433,7 @@ class CommunityApp {
         memberEl.className = 'member-item';
         memberEl.dataset.userId = user.id;
         
-        const avatarSrc = user.avatar || 'assets/images/default-avatar.png';
+        const avatarSrc = user.avatar && user.avatar !== 'default-avatar.png' ? user.avatar : 'assets/images/default-avatar.png';
         
         memberEl.innerHTML = `
             <div class="member-avatar">

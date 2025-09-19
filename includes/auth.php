@@ -43,6 +43,17 @@ class Auth {
     }
     
     public function register($username, $email, $phone, $password, $inviteCode = null) {
+        // Check if email already exists
+        $emailCheckQuery = "SELECT COUNT(*) as count FROM users WHERE email = :email";
+        $emailCheckStmt = $this->db->prepare($emailCheckQuery);
+        $emailCheckStmt->bindParam(':email', $email);
+        $emailCheckStmt->execute();
+        $emailResult = $emailCheckStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($emailResult['count'] > 0) {
+            return ['success' => false, 'message' => 'Email already exists in the system.'];
+        }
+        
         // Check if invite code is valid
         if ($inviteCode) {
             $inviteQuery = "SELECT id, role FROM invites WHERE invite_code = :code AND expires_at > NOW() AND used_at IS NULL";
@@ -55,6 +66,12 @@ class Auth {
             }
             
             $invite = $inviteStmt->fetch(PDO::FETCH_ASSOC);
+            
+            // If invite has email, user must register with that email
+            if ($invite['email'] && $invite['email'] !== $email) {
+                return ['success' => false, 'message' => 'You must register with the email address this invite was sent to: ' . $invite['email']];
+            }
+            
             $role = $invite['role'];
         } else {
             $role = 'member';
@@ -73,7 +90,7 @@ class Auth {
         
         // Create user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $insertQuery = "INSERT INTO users (username, email, phone, password, role) VALUES (:username, :email, :phone, :password, :role)";
+        $insertQuery = "INSERT INTO users (username, email, phone, password, role, avatar) VALUES (:username, :email, :phone, :password, :role, 'assets/images/default-avatar.png')";
         $insertStmt = $this->db->prepare($insertQuery);
         $insertStmt->bindParam(':username', $username);
         $insertStmt->bindParam(':email', $email);
@@ -143,6 +160,8 @@ class Auth {
                 return in_array($role, ['admin']);
             case 'send_message':
                 return in_array($role, ['admin', 'moderator', 'member']);
+            case 'delete_channels':
+                return $role === 'admin';
             default:
                 return false;
         }

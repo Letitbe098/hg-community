@@ -24,10 +24,25 @@ $user = $auth->getCurrentUser();
         <!-- Left Sidebar - Channels -->
         <div class="sidebar-left">
             <div class="server-header">
-                <h2>HG Community</h2>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    
+                <img src="assets/images/logo.jpeg" 
+     alt="Hackers Gurukul Logo" 
+     style="
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;                /* round edges */
+        background-color: rgba(255,255,255,0.6); /* faint white background */
+        border: 0.5px solid rgba(255,255,255,0.7); /* ultra-thin light border */
+        padding: 2px;                      /* very thin space around logo */
+        box-shadow: 0 0 2px rgba(255,255,255,0.4); /* subtle light glow */
+     ">
+<h2 style="display:inline-block; margin-left:8px;">HG Community</h2>
+
+                </div>
                 <div class="user-info">
                     <div class="avatar">
-                        <img src="assets/images/<?php echo htmlspecialchars($user['avatar']); ?>" alt="Avatar">
+                        <img src="<?php echo $user['avatar'] ? htmlspecialchars($user['avatar']) : 'assets/images/default-avatar.png'; ?>" alt="Avatar">
                         <div class="status-indicator online"></div>
                     </div>
                     <span class="username"><?php echo htmlspecialchars($user['username']); ?></span>
@@ -61,12 +76,16 @@ $user = $auth->getCurrentUser();
             <div class="admin-controls">
                 <button id="create-channel-btn" class="control-btn">+ New Channel</button>
                 <button id="create-invite-btn" class="control-btn">Create Invite</button>
-                <button id="manage-users-btn" class="control-btn">Manage Users</button>
+                <button id="manage-users-btn" class="control-btn" onclick="window.location.href='manage-users.php'">Manage Users</button>
+            </div>
+            <?php elseif ($user['role'] == 'moderator'): ?>
+            <div class="admin-controls">
+                <button id="manage-users-btn" class="control-btn" onclick="window.location.href='manage-users.php'">Manage Users</button>
             </div>
             <?php endif; ?>
             
             <div class="user-controls">
-                <button id="settings-btn" class="control-btn">⚙️ Settings</button>
+                <button id="settings-btn" class="control-btn" onclick="window.location.href='profile.php'">⚙️ Profile</button>
                 <button id="logout-btn" class="control-btn">🚪 Logout</button>
             </div>
         </div>
@@ -152,8 +171,8 @@ $user = $auth->getCurrentUser();
             <h2>Create Invite Link</h2>
             <form id="create-invite-form">
                 <div class="form-group">
-                    <label for="invite-email">Email (Optional)</label>
-                    <input type="email" id="invite-email" name="email">
+                    <label for="invite-email">Email (Required)</label>
+                    <input type="email" id="invite-email" name="email" required>
                 </div>
                 <div class="form-group">
                     <label for="invite-phone">Phone (Optional)</label>
